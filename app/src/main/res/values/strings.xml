@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">ft_hangouts</string>
+    <string name="add_button">new contact</string>
+    <string name="save_button">save</string>
+    <string name="name_hint">Name</string>
+    <string name="phone_hint">Phone Number</string>
+    <string name="email_hint">Email</string>
+    <string name="address_hint">Address</string>
+    <string name="zip_hint">Zip Code</string>
+    <string name="colour_green">Green</string>
+    <string name="colour_red">Red</string>
 </resources>

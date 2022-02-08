@@ -10,34 +10,47 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
+
 public class CreateContactActivity extends AppCompatActivity {
     EditText name, phone, email, address, zip;
+    ContactDatabase db;
+    int id = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_contact);
 
+        id = getIntent().getIntExtra("id", -1);
         name = findViewById(R.id.TextName);
         phone = findViewById(R.id.TextPhone);
         email = findViewById(R.id.TextEmail);
         address = findViewById(R.id.TextAddress);
         zip = findViewById(R.id.TextZip);
 
-        ContactDatabase db = new ContactDatabase(getApplicationContext());
+        db = new ContactDatabase(getApplicationContext());
+
+        getInput();
 
         Button myButton = (Button) findViewById(R.id.button);
         myButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (checkInput()) {
-                    Contact con = new Contact(name.getText().toString(), phone.getText().toString(),
+                    Contact con = new Contact(0, name.getText().toString(), phone.getText().toString(),
                             email.getText().toString(), address.getText().toString(), zip.getText().toString());
-                    Toast.makeText(getApplicationContext(), con.getContactName(), Toast.LENGTH_LONG).show();
-                    if (db.InsertContact(con)) {
-                        Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG).show();
-                        finish();
+                    if (id != -1) {
+                        con.setId(id);
+                        db.updateContact(con);
                     }
+                    else {
+                        if (db.insertContact(con)) {
+                            Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                    MainActivity.adapter.notifyDataSetChanged();
+                    finish();
                 }
             }
         });
@@ -63,5 +76,20 @@ public class CreateContactActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    private void getInput() {
+        if (id != -1) {
+            ArrayList<Contact> con = db.listContacts();
+            int i = 0;
+            while (con.get(i).getId() != id) {
+                i++;
+            }
+            name.setText(con.get(i).getName());
+            phone.setText(con.get(i).getPhone());
+            email.setText(con.get(i).getEmail());
+            address.setText(con.get(i).getAddress());
+            zip.setText(con.get(i).getZip());
+        }
     }
 }

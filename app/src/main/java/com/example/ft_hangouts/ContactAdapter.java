@@ -1,153 +1,118 @@
 package com.example.ft_hangouts;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filterable;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-//public class ContactAdapter extends RecyclerView.Adapter<ContactViewHolder> implements Filterable {
-//
-//    private Context context;
-//    private ArrayList<Contact> listContacts;
-//    private ArrayList<Contact> mArrayList;
-//
-//    private ContactDatabase mDatabase;
-//
-//    public ContactAdapter(Context context, ArrayList<Contact> listContacts) {
-//        this.context = context;
-//        this.listContacts = listContacts;
-//        this.mArrayList=listContacts;
-//        mDatabase = new ContactDatabase(context);
-//    }
-//
-//    @Override
-//    public ContactViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-//        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.contact, parent, false);
-//        return new ContactViewHolder(view);
-//    }
-//
-//    @Override
-//    public void onBindViewHolder(ContactViewHolder holder, int position) {
-//        final Contact contacts = listContacts.get(position);
-//
-//        holder.name.setText(contacts.getName());
-//        holder.ph_no.setText(contacts.getPhno());
-//
-//        holder.editContact.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                editTaskDialog(contacts);
-//            }
-//        });
-//
-//        holder.deleteContact.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                //delete row from database
-//
-//                mDatabase.deleteContact(contacts.getId());
-//
-//                //refresh the activity page.
-//                ((Activity)context).finish();
-//                context.startActivity(((Activity) context).getIntent());
-//            }
-//        });
-//    }
-//
-//    @Override
-//    public Filter getFilter() {
-//
-//        return new Filter() {
-//            @Override
-//            protected FilterResults performFiltering(CharSequence charSequence) {
-//
-//                String charString = charSequence.toString();
-//
-//                if (charString.isEmpty()) {
-//
-//                    listContacts = mArrayList;
-//                } else {
-//
-//                    ArrayList<Contacts> filteredList = new ArrayList<>();
-//
-//                    for (Contacts contacts : mArrayList) {
-//
-//                        if (contacts.getName().toLowerCase().contains(charString)) {
-//
-//                            filteredList.add(contacts);
-//                        }
-//                    }
-//
-//                    listContacts = filteredList;
-//                }
-//
-//                FilterResults filterResults = new FilterResults();
-//                filterResults.values = listContacts;
-//                return filterResults;
-//            }
-//
-//            @Override
-//            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-//                listContacts = (ArrayList<Contacts>) filterResults.values;
-//                notifyDataSetChanged();
-//            }
-//        };
-//    }
-//
-//
-//    @Override
-//    public int getItemCount() {
-//        return listContacts.size();
-//    }
-//
-//
-//    private void editTaskDialog(final Contacts contacts){
-//        LayoutInflater inflater = LayoutInflater.from(context);
-//        View subView = inflater.inflate(R.layout.add_contact_layout, null);
-//
-//        final EditText nameField = (EditText)subView.findViewById(R.id.enter_name);
-//        final EditText contactField = (EditText)subView.findViewById(R.id.enter_phno);
-//
-//        if(contacts != null){
-//            nameField.setText(contacts.getName());
-//            contactField.setText(String.valueOf(contacts.getPhno()));
-//        }
-//
-//        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-//        builder.setTitle("Edit contact");
-//        builder.setView(subView);
-//        builder.create();
-//
-//        builder.setPositiveButton("EDIT CONTACT", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                final String name = nameField.getText().toString();
-//                final String ph_no = contactField.getText().toString();
-//
-//                if(TextUtils.isEmpty(name)){
-//                    Toast.makeText(context, "Something went wrong. Check your input values", Toast.LENGTH_LONG).show();
-//                }
-//                else{
-//                    mDatabase.updateContacts(new Contacts(contacts.getId(), name, ph_no));
-//                    //refresh the activity
-//                    ((Activity)context).finish();
-//                    context.startActivity(((Activity)context).getIntent());
-//                }
-//            }
-//        });
-//
-//        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                Toast.makeText(context, "Task cancelled", Toast.LENGTH_LONG).show();
-//            }
-//        });
-//        builder.show();
-//    }
-//}
+public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHolder> {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+
+        public TextView nameText, phoneText;
+        public ImageView deleteContact;
+        public ImageView callContact;
+        public ImageView messContact;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            nameText = (TextView)itemView.findViewById(R.id.nameText);
+            phoneText = (TextView)itemView.findViewById(R.id.phoneText);
+            deleteContact = (ImageView)itemView.findViewById(R.id.deleteButton);
+            callContact = (ImageView)itemView.findViewById(R.id.callButton);
+            messContact = (ImageView)itemView.findViewById(R.id.messageButton);
+        }
+    }
+    Context _context;
+    Activity _activity;
+    private ContactDatabase db;
+    private final ArrayList<Contact> mContacts;
+
+    public ContactAdapter(ArrayList<Contact> contacts, Activity activity) {
+        mContacts = contacts;
+        _activity = activity;
+    }
+
+    @NonNull
+    @Override
+    public ContactAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        _context = parent.getContext();
+        db = new ContactDatabase(_context);
+        LayoutInflater inflater = LayoutInflater.from(_context);
+
+        // Inflate the custom layout
+        View contactView = inflater.inflate(R.layout.contact_list_layout, parent, false);
+
+        // Return a new holder instance
+        return new ViewHolder(contactView);
+    }
+
+    @Override
+    public void onBindViewHolder(ContactAdapter.ViewHolder holder, int pos) {
+        // Get the data model based on position
+        Contact contact = mContacts.get(pos);
+
+        // Set item views based on your views and data model
+        holder.nameText.setText(contact.getName());
+        holder.phoneText.setText(contact.getPhone());
+
+        holder.deleteContact.setOnClickListener(view -> {
+            //delete row from database
+            db.deleteContact(mContacts.get(pos).getId());
+            mContacts.remove(pos);
+            notifyItemRemoved(pos);
+        });
+
+        holder.nameText.setOnClickListener((v -> {
+            Intent intent = new Intent(_context, CreateContactActivity.class);
+            intent.putExtra("id", mContacts.get(pos).getId());
+            _context.startActivity(intent);
+        }));
+
+        holder.messContact.setOnClickListener(v -> mess(pos));
+
+        holder.callContact.setOnClickListener(v -> call(pos));
+    }
+
+    @Override
+    public int getItemCount() {
+        return mContacts.size();
+    }
+
+    public void call(int pos) {
+        Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + mContacts.get(pos).getPhone()));
+        final int REQUEST_PHONE_CALL = 1;
+
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(_context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(_activity, new String[]{Manifest.permission.CALL_PHONE},REQUEST_PHONE_CALL);
+            }
+            else {
+                _context.startActivity(intent);
+            }
+        }
+        else {
+            _context.startActivity(intent);
+        }
+    }
+
+    public void mess(int pos) {
+        Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("sms:" + mContacts.get(pos).getPhone()));
+        intent.putExtra("sms_body", "");
+        _context.startActivity(intent);
+    }
+}

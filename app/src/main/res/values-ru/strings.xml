@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ft_hangouts</string>
+    <string name="add_button">новый контакт</string>
+    <string name="save_button">Сохранить</string>
+    <string name="name_hint">Имя</string>
+    <string name="phone_hint">Номер Телефона</string>
+    <string name="email_hint">Email</string>
+    <string name="address_hint">Адрес</string>
+    <string name="zip_hint">Индекс</string>
+    <string name="colour_green">Зеленый</string>
+    <string name="colour_red">Красный</string>
+</resources>

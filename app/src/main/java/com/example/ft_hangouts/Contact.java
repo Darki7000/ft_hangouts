@@ -1,6 +1,7 @@
 package com.example.ft_hangouts;
 
 public class Contact {
+    private int _id;
     private String _name;
     private String _phoneNum;
     private String _email;
@@ -8,7 +9,8 @@ public class Contact {
     private String _zipCode;
 
     public Contact() {}
-    public Contact(String name, String phoneNum, String email, String address, String zipCode) {
+    public Contact(int id, String name, String phoneNum, String email, String address, String zipCode) {
+        _id = id;
         _name = name;
         _phoneNum = phoneNum;
         _email = email;
@@ -16,35 +18,41 @@ public class Contact {
         _zipCode = zipCode;
     }
 
-    public String getContactName() {
+    public int getId() {
+        return this._id;
+    }
+    public String getName() {
         return this._name;
     }
-    public String getContactPhone() {
+    public String getPhone() {
         return this._phoneNum;
     }
-    public String getContactEmail() {
+    public String getEmail() {
         return this._email;
     }
-    public String getContactAddress() {
+    public String getAddress() {
         return this._address;
     }
-    public String getContactZip() {
+    public String getZip() {
         return this._zipCode;
     }
 
-    public void setContactName(String name) {
+    public void setId(int id) {
+        this._id = id;
+    }
+    public void setName(String name) {
         this._name = name;
     }
-    public void setContactPhone(String phoneNum) {
+    public void setPhone(String phoneNum) {
         this._phoneNum = phoneNum;
     }
-    public void setContactEmail(String email) {
+    public void setEmail(String email) {
         this._email = email;
     }
-    public void setContactAddress(String address) {
+    public void setAddress(String address) {
         this._address = address;
     }
-    public void setContactZip(String zipCode) {
+    public void setZip(String zipCode) {
         this._zipCode = zipCode;
     }
 }
