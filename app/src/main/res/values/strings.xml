@@ -9,4 +9,11 @@
     <string name="zip_hint">Zip Code</string>
     <string name="colour_green">Green</string>
     <string name="colour_red">Red</string>
+    <string name="sms_sent">Message sent</string>
+    <string name="sms_delivered">Message delivered</string>
+    <string name="sms_not_delivered">Message not delivered</string>
+    <string name="generic_failure">Generic failure</string>
+    <string name="no_service">No service</string>
+    <string name="null_pdu">NULL PDU</string>
+    <string name="radio_off">Radio off</string>
 </resources>

@@ -1,5 +1,9 @@
 package com.example.ft_hangouts;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Patterns;
@@ -17,6 +21,15 @@ public class CreateContactActivity extends AppCompatActivity {
     ContactDatabase db;
     int id = -1;
 
+    private IntentFilter intentFilter;
+
+    private final BroadcastReceiver intentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onResume();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,32 +44,38 @@ public class CreateContactActivity extends AppCompatActivity {
 
         db = new ContactDatabase(getApplicationContext());
 
+        intentFilter = new IntentFilter();
+        intentFilter.addAction("SMS_RECEIVED_ACTION");
+
         getInput();
 
         Button myButton = (Button) findViewById(R.id.button);
-        myButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (checkInput()) {
-                    Contact con = new Contact(0, name.getText().toString(), phone.getText().toString(),
-                            email.getText().toString(), address.getText().toString(), zip.getText().toString());
-                    if (id != -1) {
-                        con.setId(id);
-                        db.updateContact(con);
-                    }
-                    else {
-                        if (db.insertContact(con)) {
-                            Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                    MainActivity.adapter.notifyDataSetChanged();
-                    finish();
+        myButton.setOnClickListener(v -> {
+            if (checkInput()) {
+                Contact con = new Contact(0, name.getText().toString(), phone.getText().toString(),
+                        email.getText().toString(), address.getText().toString(), zip.getText().toString());
+                if (id != -1) {
+                    con.setId(id);
+                    db.updateContact(con);
                 }
+                else {
+                    if (db.insertContact(con)) {
+                        Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG).show();
+                    }
+                }
+                MainActivity.adapter.notifyDataSetChanged();
+                finish();
             }
         });
     }
 
-    public boolean checkInput() {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(intentReceiver, intentFilter);
+    }
+
+    private boolean checkInput() {
         if(TextUtils.isEmpty( name.getText().toString())) {
             Toast.makeText(this, "Name is required", Toast.LENGTH_LONG).show();
             return false;

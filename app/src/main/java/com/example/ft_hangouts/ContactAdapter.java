@@ -111,8 +111,12 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     }
 
     public void mess(int pos) {
-        Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("sms:" + mContacts.get(pos).getPhone()));
-        intent.putExtra("sms_body", "");
+        Intent intent = new Intent(_context, MessageActivity.class);
+        intent.putExtra("num", mContacts.get(pos).getPhone());
         _context.startActivity(intent);
+
+//        Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("sms:" + mContacts.get(pos).getPhone()));
+//        intent.putExtra("sms_body", "");
+//        _context.startActivity(intent);
     }
 }

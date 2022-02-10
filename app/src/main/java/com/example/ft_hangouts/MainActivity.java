@@ -2,10 +2,15 @@ package com.example.ft_hangouts;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -17,20 +22,43 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ContactDatabase db;
+    static ContactDatabase db;
     static ContactAdapter adapter;
     RecyclerView rvContacts;
     String time = "";
+
+    private IntentFilter intentFilter;
+
+    private final BroadcastReceiver intentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle extras = intent.getExtras();
+            String phone = extras.getString("number");
+            Contact c = MainActivity.findContactByPhone(phone);
+            if (c != null) {
+                Message m = new Message(0, c.getId(), extras.getString("message"), false);
+                db.insertMessage(m);
+                onResume();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ActivityCompat.requestPermissions(this, new String[]
+                {Manifest.permission.SEND_SMS,
+                        Manifest.permission.RECEIVE_SMS,
+                        Manifest.permission.CALL_PHONE}, 1);
 
         db = new ContactDatabase(this);
         adapter = new ContactAdapter(db.listContacts(), this);
@@ -39,19 +67,17 @@ public class MainActivity extends AppCompatActivity {
         rvContacts.setAdapter(adapter);
         rvContacts.setLayoutManager(new LinearLayoutManager(this));
 
+        intentFilter = new IntentFilter();
+        intentFilter.addAction("SMS_RECEIVED_ACTION");
+
         Button myButton = (Button) findViewById(R.id.add_button);
-        myButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, CreateContactActivity.class));
-            }
-        });
+        myButton.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, CreateContactActivity.class)));
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Toast.makeText(getApplicationContext(), time, Toast.LENGTH_LONG).show();
+        registerReceiver(intentReceiver, intentFilter);
         adapter = new ContactAdapter(db.listContacts(), this);
         rvContacts.setAdapter(adapter);
     }
@@ -74,13 +100,22 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.colourGreen:
-                getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#4CAF50")));
+                Objects.requireNonNull(getSupportActionBar()).setBackgroundDrawable(new ColorDrawable(Color.parseColor("#4CAF50")));
                 return true;
             case R.id.colourRed:
-                getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#FF0000")));
+                Objects.requireNonNull(getSupportActionBar()).setBackgroundDrawable(new ColorDrawable(Color.parseColor("#FF0000")));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public static Contact findContactByPhone(String phone) {
+        ArrayList<Contact> contactsList = db.listContacts();
+        for (Contact c: contactsList) {
+            if (c.getPhone().equals(phone))
+                return c;
+        }
+        return null;
     }
 }

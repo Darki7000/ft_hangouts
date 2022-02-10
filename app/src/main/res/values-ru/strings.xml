@@ -10,4 +10,11 @@
     <string name="zip_hint">Индекс</string>
     <string name="colour_green">Зеленый</string>
     <string name="colour_red">Красный</string>
+    <string name="sms_sent">Сообщение отправленно</string>
+    <string name="sms_delivered">Сообщение получено</string>
+    <string name="sms_not_delivered">Сообщение не получено</string>
+    <string name="generic_failure">Generic failure</string>
+    <string name="no_service">No service</string>
+    <string name="null_pdu">NULL PDU</string>
+    <string name="radio_off">Radio off</string>
 </resources>
