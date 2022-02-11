@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
 
     <application
         android:name=".App"
@@ -13,10 +14,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Ft_hangouts">
-        <activity android:name=".CreateContactActivity"
-            android:parentActivityName=".MainActivity"></activity>
-        <activity android:name=".MessageActivity"
-            android:parentActivityName=".MainActivity"></activity>
+        <activity
+            android:name=".CreateContactActivity"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".MessageActivity"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -27,12 +30,12 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".MessageMonitor" android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
-            </intent-filter>
-        </receiver>
+<!--        <receiver android:name=".MessageMonitor" android:enabled="true"-->
+<!--            android:exported="false">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
     </application>
 
 </manifest>

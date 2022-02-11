@@ -41,11 +41,11 @@ public class ContactDatabase extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         try {
             db.execSQL(CREATE_TABLE_CONTACT);
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
 
         try {
             db.execSQL(CREATE_TABLE_MESSAGE);
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -66,10 +66,7 @@ public class ContactDatabase extends SQLiteOpenHelper {
         cv.put(COL6,obj.getZip());
 
         long result = db.insert(TABLE_NAME_CONTACT,null, cv);
-        if(result == -1)
-            return false;
-        else
-            return true;
+        return result != -1;
     }
 
     public ArrayList<Contact> listContacts(){
@@ -97,7 +94,7 @@ public class ContactDatabase extends SQLiteOpenHelper {
         db.delete(TABLE_NAME_CONTACT, COL1	+ "	= ?", new String[] { String.valueOf(id)});
     }
 
-    public void updateContact(Contact obj){
+    public boolean updateContact(Contact obj){
         ContentValues values = new ContentValues();
         values.put(COL2,obj.getName());
         values.put(COL3,obj.getPhone());
@@ -105,7 +102,9 @@ public class ContactDatabase extends SQLiteOpenHelper {
         values.put(COL5,obj.getAddress());
         values.put(COL6,obj.getZip());
         SQLiteDatabase db = this.getWritableDatabase();
-        db.update(TABLE_NAME_CONTACT, values, COL1	+ "	= ?", new String[] { String.valueOf(obj.getId())});
+        long result = db.update(TABLE_NAME_CONTACT, values, COL1	+ "	= ?",
+                new String[] { String.valueOf(obj.getId())});
+        return result != -1;
     }
 
     public boolean insertMessage(Message obj) {
@@ -117,10 +116,7 @@ public class ContactDatabase extends SQLiteOpenHelper {
         cv.put(COL9,obj.getIsFromMe());
 
         long result = db.insert(TABLE_NAME_MESSAGE,null, cv);
-        if(result == -1)
-            return false;
-        else
-            return true;
+        return result != -1;
     }
 
     public ArrayList<Message> listMessages(int contactId){
@@ -133,10 +129,7 @@ public class ContactDatabase extends SQLiteOpenHelper {
                 if(contactId == Integer.parseInt(cursor.getString(1))) {
                     int id = Integer.parseInt(cursor.getString(0));
                     String message = cursor.getString(2);
-                    boolean isFromMe = false;
-                    if(Integer.parseInt(cursor.getString(3)) == 1) {
-                        isFromMe = true;
-                    }
+                    boolean isFromMe = Integer.parseInt(cursor.getString(3)) == 1;
                     storeMessage.add(new Message(id, contactId, message, isFromMe));
                 }
             }while (cursor.moveToNext());

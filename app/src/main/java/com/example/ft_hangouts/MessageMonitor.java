@@ -10,8 +10,6 @@ import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 
-import java.util.ArrayList;
-
 public class MessageMonitor extends BroadcastReceiver {
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -32,7 +30,7 @@ public class MessageMonitor extends BroadcastReceiver {
                 strNumber.append(messages[i].getOriginatingAddress());
                 strMessage.append(messages[i].getMessageBody());
             }
-            Toast.makeText(context, "Message from: " + strNumber, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, "Message from: " + strNumber, Toast.LENGTH_SHORT).show();
             Intent broadcastReceiver = new Intent();
             broadcastReceiver.setAction("SMS_RECEIVED_ACTION");
             broadcastReceiver.putExtra("number", strNumber.toString());

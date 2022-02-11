@@ -17,4 +17,8 @@
     <string name="no_service">No service</string>
     <string name="null_pdu">NULL PDU</string>
     <string name="radio_off">Radio off</string>
+    <string name="name_empty">Имя не может быть пустым</string>
+    <string name="phone_empty">Номер телефона не может быть пустым</string>
+    <string name="contact_created">Контакт успешно создан</string>
+    <string name="contact_changed">Контакт успешно изменен</string>
 </resources>

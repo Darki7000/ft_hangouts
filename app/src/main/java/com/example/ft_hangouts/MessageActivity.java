@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.text.TextUtils;
 import android.view.Gravity;
-import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -27,7 +26,6 @@ import java.util.ArrayList;
 public class MessageActivity extends AppCompatActivity {
     private Contact contact;
     private ArrayList<Message> messList;
-    private ImageButton sendButton;
     private TextView messageText;
     private LinearLayout messagesList;
     SmsManager smsManager;
@@ -36,7 +34,14 @@ public class MessageActivity extends AppCompatActivity {
     private final BroadcastReceiver intentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            onResume();
+            Bundle extras = intent.getExtras();
+            String phone = extras.getString("number");
+            Contact c = MainActivity.findContactByPhone(phone);
+            if (c != null) {
+                Message m = new Message(0, c.getId(), extras.getString("message"), false);
+                MainActivity.db.insertMessage(m);
+                onResume();
+            }
         }
     };
 
@@ -45,12 +50,13 @@ public class MessageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.message_layout);
 
-        sendButton = (ImageButton) findViewById(R.id.sendButton);
+        ImageButton sendButton = (ImageButton) findViewById(R.id.sendButton);
         messageText = (TextView) findViewById(R.id.messageText);
         messagesList = (LinearLayout) findViewById(R.id.messageLinearLayout);
 
         String phone = getIntent().getStringExtra("num");
         contact = MainActivity.findContactByPhone(phone);
+        assert contact != null;
         messList = MainActivity.db.listMessages(contact.getId());
         smsManager = SmsManager.getDefault();
         setTitle(contact.getName());
@@ -61,13 +67,10 @@ public class MessageActivity extends AppCompatActivity {
             displayAllMessages();
         }
 
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (checkInput()) {
-                    sendMessage(new Message(0, contact.getId(), messageText.getText().toString(), true));
-                    messageText.setText("");
-                }
+        sendButton.setOnClickListener(v -> {
+            if (checkInput()) {
+                sendMessage(new Message(0, contact.getId(), messageText.getText().toString(), true));
+                messageText.setText("");
             }
         });
     }
@@ -80,6 +83,12 @@ public class MessageActivity extends AppCompatActivity {
         messList = MainActivity.db.listMessages(contact.getId());
         messagesList.removeAllViews();
         displayAllMessages();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        unregisterReceiver(intentReceiver);
     }
 
     private boolean checkInput() {
@@ -100,10 +109,10 @@ public class MessageActivity extends AppCompatActivity {
         String DELIVERED="SMS_DELIVERED";
 
         PendingIntent sentPI= PendingIntent.getBroadcast(this,0,
-                new Intent(SENT),0);
+                new Intent(SENT), PendingIntent.FLAG_IMMUTABLE);
 
         PendingIntent deliveredPI= PendingIntent.getBroadcast(this,0,
-                new Intent(DELIVERED),0);
+                new Intent(DELIVERED), PendingIntent.FLAG_IMMUTABLE);
 
         registerReceiver(new BroadcastReceiver(){
             @Override
@@ -184,23 +193,23 @@ public class MessageActivity extends AppCompatActivity {
 
     private TextView getMessageFromTextView(int pixels, String text) {
         LinearLayout.LayoutParams messageParams = new LinearLayout.LayoutParams(pixels, LinearLayout.LayoutParams.WRAP_CONTENT);
-        messageParams.gravity = Gravity.LEFT;
+        messageParams.gravity = Gravity.START;
         TextView messageFrom = new TextView(this);
         messageFrom.setLayoutParams(messageParams);
         messageFrom.setText(text);
         messageFrom.setTextSize(14);
-        messageFrom.setBackgroundColor(Color.parseColor("#00BCD4"));
+        messageFrom.setBackgroundColor(Color.parseColor("#D3D3D3"));
         return messageFrom;
     }
 
     private TextView getMessageToTextView(int pixels, String text) {
         LinearLayout.LayoutParams messageParams = new LinearLayout.LayoutParams(pixels, LinearLayout.LayoutParams.WRAP_CONTENT);
-        messageParams.gravity = Gravity.RIGHT;
+        messageParams.gravity = Gravity.END;
         TextView messageTo = new TextView(this);
         messageTo.setLayoutParams(messageParams);
         messageTo.setText(text);
         messageTo.setTextSize(14);
-        messageTo.setBackgroundColor(Color.parseColor("#8BC34A"));
+        messageTo.setBackgroundColor(Color.parseColor("#98FB98"));
         return messageTo;
     }
 }

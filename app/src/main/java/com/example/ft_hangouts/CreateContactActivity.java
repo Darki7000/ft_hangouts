@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Patterns;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -20,13 +18,19 @@ public class CreateContactActivity extends AppCompatActivity {
     EditText name, phone, email, address, zip;
     ContactDatabase db;
     int id = -1;
-
     private IntentFilter intentFilter;
 
     private final BroadcastReceiver intentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            onResume();
+            Bundle extras = intent.getExtras();
+            String phone = extras.getString("number");
+            Contact c = MainActivity.findContactByPhone(phone);
+            if (c != null) {
+                Message m = new Message(0, c.getId(), extras.getString("message"), false);
+                MainActivity.db.insertMessage(m);
+                onResume();
+            }
         }
     };
 
@@ -56,14 +60,15 @@ public class CreateContactActivity extends AppCompatActivity {
                         email.getText().toString(), address.getText().toString(), zip.getText().toString());
                 if (id != -1) {
                     con.setId(id);
-                    db.updateContact(con);
+                    if (db.updateContact(con)) {
+                        Toast.makeText(getApplicationContext(), R.string.contact_changed, Toast.LENGTH_LONG).show();
+                    }
                 }
                 else {
                     if (db.insertContact(con)) {
-                        Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), R.string.contact_created, Toast.LENGTH_LONG).show();
                     }
                 }
-                MainActivity.adapter.notifyDataSetChanged();
                 finish();
             }
         });
@@ -75,23 +80,20 @@ public class CreateContactActivity extends AppCompatActivity {
         registerReceiver(intentReceiver, intentFilter);
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        unregisterReceiver(intentReceiver);
+    }
+
     private boolean checkInput() {
         if(TextUtils.isEmpty( name.getText().toString())) {
-            Toast.makeText(this, "Name is required", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.name_empty, Toast.LENGTH_LONG).show();
             return false;
         }
 
         if(TextUtils.isEmpty( phone.getText().toString())) {
-            Toast.makeText(this, "Phone is required", Toast.LENGTH_LONG).show();
-            return false;
-        }
-        if(TextUtils.isEmpty(email.getText().toString().trim()) ||
-                !Patterns.EMAIL_ADDRESS.matcher(email.getText().toString().trim()).matches()) {
-            Toast.makeText(this, "Invalid email", Toast.LENGTH_LONG).show();
-            return false;
-        }
-        if(phone.getText().toString().length() < 10) {
-            Toast.makeText(this, "Phone must be 10 digits", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.phone_empty, Toast.LENGTH_LONG).show();
             return false;
         }
         return true;

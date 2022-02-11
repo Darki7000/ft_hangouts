@@ -17,22 +17,16 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
     static ContactDatabase db;
-    static ContactAdapter adapter;
+    ContactAdapter adapter;
     RecyclerView rvContacts;
-    String time = "";
 
     private IntentFilter intentFilter;
 
@@ -83,10 +77,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
-        SimpleDateFormat sdf = new SimpleDateFormat("HH mm ss", Locale.getDefault());
-        time = sdf.format(new Date());
+        unregisterReceiver(intentReceiver);
     }
 
     @Override

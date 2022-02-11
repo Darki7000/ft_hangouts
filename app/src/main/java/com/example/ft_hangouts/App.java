@@ -27,6 +27,12 @@ public class App extends Application implements Application.ActivityLifecycleCal
     }
 
     @Override
+    public void onTerminate() {
+        unregisterReceiver(monitor);
+        super.onTerminate();
+    }
+
+    @Override
     public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
 
     }
@@ -55,7 +61,6 @@ public class App extends Application implements Application.ActivityLifecycleCal
     @Override
     public void onActivityStopped(@NonNull Activity activity) {
         if (--activityReferences == 0) {
-            // App enters background
             lastTime = Calendar.getInstance();
         }
     }

@@ -16,4 +16,8 @@
     <string name="no_service">No service</string>
     <string name="null_pdu">NULL PDU</string>
     <string name="radio_off">Radio off</string>
+    <string name="name_empty">Name is required</string>
+    <string name="phone_empty">Phone number is required</string>
+    <string name="contact_created">Contact successfully created</string>
+    <string name="contact_changed">Contact successfully changed</string>
 </resources>
